@@ -43,18 +43,22 @@ export default function Admin() {
       <CssBaseline />
 
       {/* NAVBAR */}
-      <AppBar
-        position="fixed"
-        sx={{
-          zIndex: (theme) => theme.zIndex.drawer + 1,
-          background: "linear-gradient(90deg, #0d47a1, #1976d2)",
-          boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
-        }}
-      >
+<AppBar
+  position="fixed"
+  sx={{
+    zIndex: (theme) => theme.zIndex.drawer + 1,
+    background: "linear-gradient(90deg, #0d47a1dd, #1976d2dd)",
+    backdropFilter: "blur(12px)",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.25)",
+    borderBottom: "1px solid rgba(255,255,255,0.15)",
+  }}
+>
+
         <Toolbar>
-          <Typography variant="h6" noWrap sx={{ fontWeight: "bold" }}>
-            LabPilot Admin Dashboard
+          <Typography variant="h5" noWrap sx={{ fontWeight: "800", letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: 1, }}>
+            Admin Dashboard
           </Typography>
+
         </Toolbar>
       </AppBar>
 
