@@ -25,7 +25,6 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import SendIcon from "@mui/icons-material/Send";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import ScienceIcon from "@mui/icons-material/Science";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
