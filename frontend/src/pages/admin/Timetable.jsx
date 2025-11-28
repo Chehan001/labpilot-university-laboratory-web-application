@@ -17,8 +17,13 @@ import {
   Card,
   CardContent,
   Divider,
+  Stack,
+  InputAdornment,
+  Chip,
+  Alert,
+  Fade,
 } from "@mui/material";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { db } from "../../firebase/config";
 import {
   collection,
@@ -27,9 +32,18 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import SearchIcon from "@mui/icons-material/Search";
+import BadgeIcon from "@mui/icons-material/Badge";
+import ScienceIcon from "@mui/icons-material/Science";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 
 export default function Timetable() {
   const [tabIndex, setTabIndex] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [badge, setBadge] = useState("");
   const [lab, setLab] = useState("");
@@ -40,6 +54,7 @@ export default function Timetable() {
   const [searchLab, setSearchLab] = useState("");
   const [searchBadge, setSearchBadge] = useState("");
   const [timeSlots, setTimeSlots] = useState([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
@@ -58,7 +73,8 @@ export default function Timetable() {
       createdAt: new Date(),
     });
 
-    alert("Time slot added successfully!");
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
 
     setBadge("");
     setLab("");
@@ -68,383 +84,639 @@ export default function Timetable() {
   };
 
   const fetchLabTimetable = async () => {
+    if (!searchLab.trim()) {
+      alert("Please enter a lab name to search.");
+      return;
+    }
     const q = query(collection(db, "timetable"), where("lab", "==", searchLab));
     const snapshot = await getDocs(q);
     setTimeSlots(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+    setHasSearched(true);
   };
 
   const fetchBadgeTimetable = async () => {
+    if (!searchBadge.trim()) {
+      alert("Please enter a badge number to search.");
+      return;
+    }
     const q = query(
       collection(db, "timetable"),
       where("badge", "==", searchBadge)
     );
     const snapshot = await getDocs(q);
     setTimeSlots(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+    setHasSearched(true);
   };
 
   const dayColors = {
-    Monday: "#E3F2FD",
-    Tuesday: "#FCE4EC",
-    Wednesday: "#E8F5E9",
-    Thursday: "#FFF3E0",
-    Friday: "#F3E5F5",
+    Monday: { bg: "#E3F2FD", text: "#1565C0", border: "#90CAF9" },
+    Tuesday: { bg: "#FCE4EC", text: "#C2185B", border: "#F48FB1" },
+    Wednesday: { bg: "#E8F5E9", text: "#2E7D32", border: "#81C784" },
+    Thursday: { bg: "#FFF3E0", text: "#EF6C00", border: "#FFB74D" },
+    Friday: { bg: "#F3E5F5", text: "#7B1FA2", border: "#CE93D8" },
   };
 
   return (
-    <Box p={3}>
-
-
-      {/* Tabs */}
-      <Tabs
-        value={tabIndex}
-        onChange={(e, v) => setTabIndex(v)}
-        centered
-        TabIndicatorProps={{
-          style: {
-            height: 4,
-            borderRadius: 4,
-            background: "linear-gradient(90deg,#1976d2,#42a5f5)",
-          },
-        }}
-        sx={{
-          mb: 4,
-          "& .MuiTab-root": {
-            fontSize: "16px",
-            fontWeight: 700,
-            textTransform: "none",
-            px: 3,
-            transition: "0.2s",
-            "&:hover": { color: "#1976d2" },
-          },
-        }}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        p: { xs: 2, md: 4 },
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
       >
-        <Tab label="Add Time Slot" />
-        <Tab label="Show Timetable" />
-      </Tabs>
-
-
-
-      {/* ADD TIME SLOT */}
-      {tabIndex === 0 && (
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-          <Paper
-            elevation={6}
-            sx={{
-              p: 4,
-              borderRadius: 5,
-              background: "rgba(255,255,255,0.9)",
-              backdropFilter: "blur(10px)",
-              maxWidth: 600,
-              mx: "auto",
-              mt: 3,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-            }}
-          >
-            <Typography
-              sx={{
-                fontWeight: 700,
-                fontSize: "22px",
-                mb: 3,
-                textAlign: "center",
-              }}
-            >
-              Add New Time Slot
+        <Box sx={{ maxWidth: 1000, mx: "auto" }}>
+          {/* Header */}
+          <Box sx={{ mb: 4, textAlign: "center" }}>
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={2} sx={{ mb: 1 }}>
+              <EventNoteIcon sx={{ fontSize: 40, color: "rgba(94, 92, 92, 0.9)" }} />
+              <Typography
+                variant="h3"
+                sx={{
+                  color: "rgba(94, 92, 92, 0.9)",
+                  fontWeight: 700,
+                  textShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                }}
+              >
+                Timetable Management
+              </Typography>
+            </Stack>
+            <Typography variant="body1" sx={{ color: "#546e7a", fontSize: "1.1rem" }}>
+              Schedule and track laboratory time slots efficiently
             </Typography>
+          </Box>
 
-            <Grid container spacing={4}>
-              {/* Badge */}
-              <Grid item xs={12}>
-                <TextField
-                  label="Badge"
-                  fullWidth
-                  value={badge}
-                  onChange={(e) => setBadge(e.target.value)}
+          {/* Success Alert */}
+          <AnimatePresence>
+            {showSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Alert
+                  severity="success"
+                  icon={<CheckCircleOutlineIcon />}
                   sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "14px",
-                      background: "rgba(255,255,255,0.75)",
-                      transition: "0.25s",
-                      "&:hover": {
-                        background: "rgba(255,255,255,0.9)",
-                        boxShadow: "0 3px 12px rgba(0,0,0,0.06)",
-                      },
-                      "&.Mui-focused": {
-                        boxShadow: "0 4px 14px rgba(25,118,210,0.25)",
-                      },
-                    },
-                  }}
-                />
-              </Grid>
-
-              {/* Lab */}
-              <Grid item xs={12}>
-                <TextField
-                  label="Lab Name"
-                  fullWidth
-                  value={lab}
-                  onChange={(e) => setLab(e.target.value)}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "14px",
-                      background: "rgba(255,255,255,0.75)",
-                      transition: "0.25s",
-                      
-                    },
-                  }}
-                />
-              </Grid>
-            </Grid>
-
-            <Grid container spacing={3} mt={3}>
-              {/* Day */}
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  label="Select Day"
-                  fullWidth
-                  value={day}
-                  onChange={(e) => setDay(e.target.value)}
-                  helperText={!day ? "Please select a day to continue" : ""}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "14px",
-                      background: "rgba(255,255,255,0.75)",
-                      transition: "0.25s",
-                      "&:hover": {
-                        background: "rgba(255,255,255,0.9)",
-                        boxShadow: "0 3px 12px rgba(0,0,0,0.06)",
-                      },
-                      "&.Mui-focused": {
-                        boxShadow: "0 4px 14px rgba(25,118,210,0.25)",
-                      },
-                    },
+                    mb: 3,
+                    borderRadius: 3,
+                    boxShadow: "0 4px 20px rgba(76, 175, 80, 0.3)",
+                    fontWeight: 600,
                   }}
                 >
-                  {days.map((d) => (
-                    <MenuItem key={d} value={d}>
-                      {d}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
+                  Time slot added successfully!
+                </Alert>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-              {/* Start Time */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  type="time"
-                  label="Start Time"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "14px",
-                      background: "rgba(255,255,255,0.75)",
-                    },
-                  }}
-                />
-              </Grid>
-
-              {/* End Time */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  type="time"
-                  label="End Time"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "14px",
-                      background: "rgba(255,255,255,0.75)",
-                    },
-                  }}
-                />
-              </Grid>
-            </Grid>
-
-            {/* BUTTON */}
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{
-                mt: 3,
-                py: 1.3,
-                borderRadius: "50px",
-                fontSize: "17px",
-                fontWeight: 600,
-                textTransform: "none",
-                background: "linear-gradient(90deg, #1565c0, #42a5f5)",
-                boxShadow: "0px 4px 16px rgba(25,118,210,0.35)",
-                transition: "0.25s",
-                "&:hover": {
-                  boxShadow: "0px 6px 20px rgba(25,118,210,0.45)",
+          {/* Tabs */}
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 4,
+              overflow: "hidden",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+            }}
+          >
+            <Tabs
+              value={tabIndex}
+              onChange={(e, v) => setTabIndex(v)}
+              variant="fullWidth"
+              TabIndicatorProps={{
+                style: {
+                  height: 4,
+                  borderRadius: "4px 4px 0 0",
+                  background: "linear-gradient(90deg, #1976d2, #42a5f5)",
                 },
               }}
-              onClick={handleAddSlot}
+              sx={{
+                background: "linear-gradient(90deg, #4a93dcff 0%, #42a5f5 100%)",
+                "& .MuiTab-root": {
+                  fontSize: { xs: "0.9rem", md: "1rem" },
+                  fontWeight: 700,
+                  textTransform: "none",
+                  color: "rgba(255,255,255,0.7)",
+                  py: 2.5,
+                  transition: "all 0.3s",
+                  "&:hover": {
+                    color: "rgba(255,255,255,0.95)",
+                    background: "rgba(255,255,255,0.1)",
+                  },
+                  "&.Mui-selected": {
+                    color: "#fff",
+                    background: "rgba(255,255,255,0.15)",
+                  },
+                },
+              }}
             >
-              Submit
-            </Button>
-          </Paper>
-        </motion.div>
-      )}
+              <Tab icon={<AddCircleOutlineIcon />} iconPosition="start" label="Add Time Slot" />
+              <Tab icon={<SearchIcon />} iconPosition="start" label="Show Timetable" />
+            </Tabs>
 
+            {/* ADD TIME SLOT */}
+            {tabIndex === 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Box sx={{ p: { xs: 3, md: 5 }, background: "#fafafa" }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 4,
+                      borderRadius: 4,
+                      background: "white",
+                      border: "1px solid #e0e0e0",
+                      maxWidth: 700,
+                      mx: "auto",
+                    }}
+                  >
+                    <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 2,
+                          background: "linear-gradient(90deg, #4a93dcff 0%, #42a5f5 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <AddCircleOutlineIcon sx={{ color: "white", fontSize: 28 }} />
+                      </Box>
+                      <Typography variant="h5" fontWeight={700} color="#2c3e50">
+                        Add New Time Slot
+                      </Typography>
+                    </Stack>
 
+                    <Grid container spacing={3}>
+                      {/* Badge */}
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="Badge Number"
+                          fullWidth
+                          value={badge}
+                          onChange={(e) => setBadge(e.target.value)}
+                          placeholder="Enter staff badge number"
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <BadgeIcon color="action" />
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 2,
+                              transition: "all 0.3s",
+                              "&:hover": {
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                              },
+                              "&.Mui-focused": {
+                                boxShadow: "0 4px 20px rgba(102, 126, 234, 0.25)",
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
 
-      {/* SHOW TIMETABLE */}
-      {tabIndex === 1 && (
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-          <Paper
-            elevation={6}
-            sx={{
-              p: 4,
-              borderRadius: 5,
-              background: "rgba(255,255,255,0.9)",
-              backdropFilter: "blur(10px)",
-              maxWidth: 900,
-              mx: "auto",
-              boxShadow: "0 4px 18px rgba(0,0,0,0.1)",
-            }}
-          >
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
-              Search Timetable
-            </Typography>
+                      {/* Lab */}
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="Laboratory Name"
+                          fullWidth
+                          value={lab}
+                          onChange={(e) => setLab(e.target.value)}
+                          placeholder="e.g., Chemistry Lab A"
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <ScienceIcon color="action" />
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 2,
+                              transition: "all 0.3s",
+                              "&:hover": {
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                              },
+                              "&.Mui-focused": {
+                                boxShadow: "0 4px 20px rgba(102, 126, 234, 0.25)",
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
 
-            <Grid container spacing={4}>
-              {/* Search Lab */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Search by Lab Name"
-                  fullWidth
-                  value={searchLab}
-                  onChange={(e) => setSearchLab(e.target.value)}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "14px",
-                      background: "rgba(255,255,255,0.75)",
-                    },
-                  }}
-                />
+                      {/* Day */}
+                      <Grid item xs={12}>
+                        <TextField
+                          select
+                          label="Select Day"
+                          fullWidth
+                          value={day}
+                          onChange={(e) => setDay(e.target.value)}
+                          helperText={!day ? "Please select a day to continue" : ""}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <CalendarTodayIcon color="action" />
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 2,
+                              transition: "all 0.3s",
+                              "&:hover": {
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                              },
+                              "&.Mui-focused": {
+                                boxShadow: "0 4px 20px rgba(102, 126, 234, 0.25)",
+                              },
+                            },
+                          }}
+                        >
+                          {days.map((d) => (
+                            <MenuItem key={d} value={d}>
+                              <Stack direction="row" alignItems="center" spacing={1.5}>
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: "50%",
+                                    background: dayColors[d].text,
+                                  }}
+                                />
+                                <Typography fontWeight={500}>{d}</Typography>
+                              </Stack>
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Grid>
 
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{
-                    mt: 2,
-                    py: 1.3,
-                    borderRadius: "40px",
-                    background: "linear-gradient(90deg,#1976d2,#42a5f5)",
-                    fontWeight: 600,
-                    textTransform: "none",
-                    boxShadow: "0 3px 10px rgba(0,0,0,0.15)",
-                  }}
-                  onClick={fetchLabTimetable}
-                >
-                  View Lab Timetable
-                </Button>
-              </Grid>
+                      {/* Start Time */}
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          type="time"
+                          label="Start Time"
+                          fullWidth
+                          InputLabelProps={{ shrink: true }}
+                          value={startTime}
+                          onChange={(e) => setStartTime(e.target.value)}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <AccessTimeIcon color="action" />
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 2,
+                              transition: "all 0.3s",
+                              "&:hover": {
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                              },
+                              "&.Mui-focused": {
+                                boxShadow: "0 4px 20px rgba(102, 126, 234, 0.25)",
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
 
-              {/* Search Badge */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Search by Badge"
-                  fullWidth
-                  value={searchBadge}
-                  onChange={(e) => setSearchBadge(e.target.value)}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "14px",
-                      background: "rgba(255,255,255,0.75)",
-                    },
-                  }}
-                />
+                      {/* End Time */}
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          type="time"
+                          label="End Time"
+                          fullWidth
+                          InputLabelProps={{ shrink: true }}
+                          value={endTime}
+                          onChange={(e) => setEndTime(e.target.value)}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <AccessTimeIcon color="action" />
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 2,
+                              transition: "all 0.3s",
+                              "&:hover": {
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                              },
+                              "&.Mui-focused": {
+                                boxShadow: "0 4px 20px rgba(102, 126, 234, 0.25)",
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
 
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{
-                    mt: 2,
-                    py: 1.3,
-                    borderRadius: "40px",
-                    background: "linear-gradient(90deg,#1976d2,#42a5f5)",
-                    fontWeight: 600,
-                    textTransform: "none",
-                    boxShadow: "0 3px 10px rgba(0,0,0,0.15)",
-                  }}
-                  onClick={fetchBadgeTimetable}
-                >
-                  View Badge Timetable
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
+                    {/* BUTTON */}
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        startIcon={<CheckCircleOutlineIcon />}
+                        sx={{
+                          mt: 4,
+                          py: 1.8,
+                          borderRadius: 14,
+                          fontSize: "1.05rem",
+                          fontWeight: 700,
+                          textTransform: "none",
+                          background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+                          boxShadow: "0 4px 20px rgba(25, 118, 210, 0.4)",
+                          transition: "all 0.3s",
+                          "&:hover": {
+                            background: "linear-gradient(90deg, #1565c0, #1976d2)",
+                            boxShadow: "0 6px 30px rgba(25, 118, 210, 0.5)",
+                            transform: "translateY(-2px)",
+                          },
+                        }}
+                        onClick={handleAddSlot}
+                      >
+                        Add Time Slot
+                      </Button>
+                    </motion.div>
+                  </Paper>
+                </Box>
+              </motion.div>
+            )}
 
+            {/* SHOW TIMETABLE */}
+            {tabIndex === 1 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Box sx={{ p: { xs: 3, md: 5 }, background: "#fafafa" }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 4,
+                      borderRadius: 4,
+                      background: "white",
+                      border: "1px solid #e0e0e0",
+                      mb: 4,
+                    }}
+                  >
+                    <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 2,
+                          background: "linear-gradient(90deg, #4a93dcff 0%, #42a5f5 100%)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <SearchIcon sx={{ color: "white", fontSize: 28 }} />
+                      </Box>
+                      <Typography variant="h5" fontWeight={700} color="#2c3e50">
+                        Search Timetable
+                      </Typography>
+                    </Stack>
 
+                    <Grid container spacing={3}>
+                      {/* Search Lab */}
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="Search by Lab Name"
+                          fullWidth
+                          value={searchLab}
+                          onChange={(e) => setSearchLab(e.target.value)}
+                          placeholder="Enter lab name"
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <ScienceIcon color="action" />
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{
+                            mb: 2,
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 2,
+                              transition: "all 0.3s",
+                              "&:hover": {
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                              },
+                              "&.Mui-focused": {
+                                boxShadow: "0 4px 20px rgba(102, 126, 234, 0.25)",
+                              },
+                            },
+                          }}
+                        />
 
-          {/* Timetable Results */}
-          <Card
-            elevation={6}
-            sx={{
-              mt: 4,
-              borderRadius: 5,
-              background: "rgba(255,255,255,0.93)",
-              boxShadow: "0px 4px 14px rgba(0,0,0,0.08)",
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" fontWeight={700}>
-                Timetable Results
-              </Typography>
+                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            startIcon={<SearchIcon />}
+                            sx={{
+                              py: 1.5,
+                              borderRadius: 14,
+                              fontWeight: 600,
+                              fontSize: "1rem",
+                              textTransform: "none",
+                              background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+                              boxShadow: "0 4px 20px rgba(25, 118, 210, 0.4)",
+                              transition: "all 0.3s",
+                              "&:hover": {
+                                background: "linear-gradient(90deg, #1565c0, #1976d2)",
+                                boxShadow: "0 6px 30px rgba(25, 118, 210, 0.5)",
+                              },
+                            }}
+                            onClick={fetchLabTimetable}
+                          >
+                            Search by Lab
+                          </Button>
+                        </motion.div>
+                      </Grid>
 
-              <Divider sx={{ my: 2 }} />
+                      {/* Search Badge */}
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="Search by Badge"
+                          fullWidth
+                          value={searchBadge}
+                          onChange={(e) => setSearchBadge(e.target.value)}
+                          placeholder="Enter badge number"
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <BadgeIcon color="action" />
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{
+                            mb: 2,
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 2,
+                              transition: "all 0.3s",
+                              "&:hover": {
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                              },
+                              "&.Mui-focused": {
+                                boxShadow: "0 4px 20px rgba(102, 126, 234, 0.25)",
+                              },
+                            },
+                          }}
+                        />
 
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>Day</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Badge</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Lab</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Start</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>End</TableCell>
-                  </TableRow>
-                </TableHead>
+                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            startIcon={<SearchIcon />}
+                            sx={{
+                              py: 1.5,
+                              borderRadius: 14,
+                              fontWeight: 600,
+                              fontSize: "1rem",
+                              textTransform: "none",
+                              background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+                              boxShadow: "0 4px 20px rgba(25, 118, 210, 0.4)",
+                              transition: "all 0.3s",
+                              "&:hover": {
+                                background: "linear-gradient(90deg, #1565c0, #1976d2)",
+                                boxShadow: "0 6px 30px rgba(25, 118, 210, 0.5)",
+                              },
+                            }}
+                            onClick={fetchBadgeTimetable}
+                          >
+                            Search by Badge
+                          </Button>
+                        </motion.div>
+                      </Grid>
+                    </Grid>
+                  </Paper>
 
-                <TableBody>
-                  {timeSlots.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                        No records found.
-                      </TableCell>
-                    </TableRow>
+                  {/* Timetable Results */}
+                  {hasSearched && (
+                    <Fade in={hasSearched}>
+                      <Card
+                        elevation={0}
+                        sx={{
+                          borderRadius: 4,
+                          border: "1px solid #e0e0e0",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                              background: "linear-gradient(90deg, #4a93dcff 0%, #42a5f5 100%)",
+                            p: 2.5,
+                          }}
+                        >
+                          <Typography variant="h6" fontWeight={700} color="white">
+                            Timetable Results
+                          </Typography>
+                        </Box>
+
+                        <CardContent sx={{ p: 0 }}>
+                          {timeSlots.length === 0 ? (
+                            <Box sx={{ p: 6, textAlign: "center" }}>
+                              <SearchIcon sx={{ fontSize: 64, color: "#bdbdbd", mb: 2 }} />
+                              <Typography variant="h6" color="text.secondary" fontWeight={600}>
+                                No records found
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                Try searching with a different lab name or badge number
+                              </Typography>
+                            </Box>
+                          ) : (
+                            <Box sx={{ overflowX: "auto" }}>
+                              <Table>
+                                <TableHead>
+                                  <TableRow sx={{ background: "#f5f5f5" }}>
+                                    <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#2c3e50" }}>
+                                      Day
+                                    </TableCell>
+                                    <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#2c3e50" }}>
+                                      Badge
+                                    </TableCell>
+                                    <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#2c3e50" }}>
+                                      Lab
+                                    </TableCell>
+                                    <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#2c3e50" }}>
+                                      Start
+                                    </TableCell>
+                                    <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#2c3e50" }}>
+                                      End
+                                    </TableCell>
+                                  </TableRow>
+                                </TableHead>
+
+                                <TableBody>
+                                  {timeSlots.map((slot, index) => (
+                                    <motion.tr
+                                      key={slot.id}
+                                      initial={{ opacity: 0, x: -20 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      component={TableRow}
+                                      sx={{
+                                        borderLeft: `4px solid ${dayColors[slot.day]?.border}`,
+                                        backgroundColor: dayColors[slot.day]?.bg,
+                                        transition: "all 0.3s",
+                                        "&:hover": {
+                                          transform: "translateX(4px)",
+                                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                                        },
+                                      }}
+                                    >
+                                      <TableCell>
+                                        <Chip
+                                          label={slot.day}
+                                          size="small"
+                                          sx={{
+                                            backgroundColor: "white",
+                                            color: dayColors[slot.day]?.text,
+                                            fontWeight: 700,
+                                            border: `2px solid ${dayColors[slot.day]?.border}`,
+                                          }}
+                                        />
+                                      </TableCell>
+                                      <TableCell sx={{ fontWeight: 600 }}>{slot.badge}</TableCell>
+                                      <TableCell>{slot.lab}</TableCell>
+                                      <TableCell sx={{ fontWeight: 500 }}>{slot.startTime}</TableCell>
+                                      <TableCell sx={{ fontWeight: 500 }}>{slot.endTime}</TableCell>
+                                    </motion.tr>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Fade>
                   )}
-
-                  {timeSlots.map((slot) => (
-                    <TableRow
-                      key={slot.id}
-                      sx={{
-                        backgroundColor: dayColors[slot.day],
-                        transition: "0.25s",
-                        "&:hover": {
-                          transform: "scale(1.01)",
-                          boxShadow: "0px 4px 14px rgba(0,0,0,0.1)",
-                        },
-                      }}
-                    >
-                      <TableCell>{slot.day}</TableCell>
-                      <TableCell>{slot.badge}</TableCell>
-                      <TableCell>{slot.lab}</TableCell>
-                      <TableCell>{slot.startTime}</TableCell>
-                      <TableCell>{slot.endTime}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+                </Box>
+              </motion.div>
+            )}
+          </Paper>
+        </Box>
+      </motion.div>
     </Box>
   );
 }
