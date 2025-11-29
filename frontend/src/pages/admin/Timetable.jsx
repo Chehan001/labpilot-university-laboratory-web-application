@@ -233,7 +233,7 @@ export default function Timetable() {
                       borderRadius: 4,
                       background: "white",
                       border: "1px solid #e0e0e0",
-                      maxWidth: 700,
+                      maxWidth: 660,
                       mx: "auto",
                     }}
                   >
@@ -475,6 +475,8 @@ export default function Timetable() {
                       background: "white",
                       border: "1px solid #e0e0e0",
                       mb: 4,
+                      maxWidth: 600,   
+                      mx: "auto",
                     }}
                   >
                     <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
@@ -624,7 +626,7 @@ export default function Timetable() {
                       >
                         <Box
                           sx={{
-                              background: "linear-gradient(90deg, #4a93dcff 0%, #42a5f5 100%)",
+                            background: "linear-gradient(90deg, #4a93dcff 0%, #42a5f5 100%)",
                             p: 2.5,
                           }}
                         >
