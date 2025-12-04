@@ -35,7 +35,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* Redirect root → login */}
+        {/*  root → login */}
         <Route path="/" element={<Navigate to="/login" />} />
 
         {/* Public Routes */}
@@ -49,7 +49,6 @@ export default function App() {
         <Route path="/userattendance" element={<UserAttendance />} />
         <Route path="/userreports" element={<UserReports />} />
         </Route>
-
 
         {/* Admin Routes  */}
         <Route
