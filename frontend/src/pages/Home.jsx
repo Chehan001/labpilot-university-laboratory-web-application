@@ -37,7 +37,7 @@ export default function Home() {
       sx={{
         display: "flex",
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #bacff0ff 25%, #90aeddff 75%)",
+        background: "linear-gradient(135deg, #bacff0ff 25%, #2665ccff 75%)",
       }}
     >
       <Box

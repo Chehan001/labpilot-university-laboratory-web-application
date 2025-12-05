@@ -133,7 +133,7 @@ export default function UserAttendance() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #b1dbeeff 0%, #8ea0ffff 100%)",
+        background: "linear-gradient(135deg, #b1dbeeff 0%, #1531baff 100%)",
         py: { xs: 2, sm: 3, md: 4 },
         px: { xs: 2, sm: 3, md: 4 },
       }}
@@ -198,9 +198,10 @@ export default function UserAttendance() {
                   sm: "repeat(3, 1fr)",
                 },
                 gap: { xs: 1.5, sm: 2, md: 3 },
-                mb: { xs: 2, sm: 3, md: 4 },  
+                mb: { xs: 2, sm: 3, md: 4 },
               }}
             >
+
               {/* Total Sessions */}
               <Card
                 elevation={4}
@@ -286,7 +287,7 @@ export default function UserAttendance() {
                         sx={{
                           opacity: 0.9,
                           mb: 0.5,
-                         fontSize: { xs: "1.5rem", sm: "1.5rem" },
+                          fontSize: { xs: "1.5rem", sm: "1.5rem" },
                         }}
                       >
                         Present
@@ -354,7 +355,7 @@ export default function UserAttendance() {
                           opacity: 0.9,
                           mb: 0.5,
                           fontSize: { xs: "1.5rem", sm: "1.5rem" },
-                        }} 
+                        }}
                       >
                         Absent
                       </Typography>

@@ -130,7 +130,7 @@ export default function UserPracticals() {
         minHeight: "100vh",
         marginLeft: { xs: 0, lg: "60px" }, // Space --> navbar
         transition: "margin-left 0.35s ease",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        background: "linear-gradient(135deg, #b6cdefff 0%, #044abcff 100%)",
       }}
     >
       <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1400, mx: "auto" }}>
@@ -143,20 +143,31 @@ export default function UserPracticals() {
           <Box sx={{ mb: 4, mt: { xs: 6, lg: 0 } }}>
             <Typography
               variant="h3"
-              fontWeight={700}
               sx={{
-                background: "linear-gradient(135deg, #6176d7ff 0%, #0e0662ff 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                mb: 1,
+                fontWeight: 800,
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                mb: 3,
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
+                background: "linear-gradient(135deg, #1b1fabff 0%, #1843b9ff 40%, #1e3ca1ff 100%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                position: "relative",
+                textShadow: "0 0 10px rgba(90,110,255,0.4), 0 0 20px rgba(90,110,255,0.3)",
+                fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                animation: "fadeSlide 1.1s ease",
+                "@keyframes fadeSlide": {
+                  "0%": { opacity: 0, transform: "translateY(-10px)" },
+                  "100%": { opacity: 1, transform: "translateY(0)" },
+                },
               }}
             >
               Laboratory Practicals
             </Typography>
+
           </Box>
 
           {/* Search Section */}
@@ -309,7 +320,7 @@ export default function UserPracticals() {
                               handleViewDetails(practical);
                             }}
                             sx={{
-                              borderRadius: 2,
+                              borderRadius: 15,
                               textTransform: "none",
                               fontWeight: 600,
                             }}
@@ -473,7 +484,7 @@ export default function UserPracticals() {
                       elevation={1}
                       sx={{
                         p: 2.5,
-                        borderRadius: 2,
+                        borderRadius: 8,
                         background: "#f8f9fa",
                         mt: 2,
                       }}
@@ -502,10 +513,10 @@ export default function UserPracticals() {
                           onClick={() => handleDownloadPDF(viewingPractical)}
                           disabled={!viewingPractical.fileUrl}
                           sx={{
-                            borderRadius: 2,
+                            borderRadius: 15,
                             textTransform: "none",
                             fontWeight: 600,
-                            background: "linear-gradient(135deg, #4f94eeff 0%, #0c1f87ff 100%)",
+                            background: "linear-gradient(135deg, #9ec5f9ff 0%, #b3bbe8ff 100%)",
                           }}
                         >
                           Download PDF
@@ -524,7 +535,7 @@ export default function UserPracticals() {
             variant="outlined"
             onClick={handleCloseDialog}
             sx={{
-              borderRadius: 2,
+              borderRadius: 15,
               textTransform: "none",
               fontWeight: 600,
             }}
