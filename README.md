@@ -1,11 +1,3 @@
-  _          _     ____  _ _       _    
- | |    __ _| |__ |  _ \(_) | ___ | |_  
- | |   / _` | '_ \| |_) | | |/ _ \| __| 
- | |__| (_| | |_) |  __/| | | (_) | |_  
- |_____\__,_|_.__/|_|   |_|_|\___/ \__| 
-                                                                     
-
-
 𝙇𝙖𝙗𝙋𝙞𝙡𝙤𝙩 – 𝙇𝙖𝙗𝙤𝙧𝙖𝙩𝙤𝙧𝙮 𝙈𝙖𝙣𝙖𝙜𝙚𝙢𝙚𝙣𝙩 𝙒𝙚𝙗 𝘼𝙥𝙥𝙡𝙞𝙘𝙖𝙩𝙞𝙤𝙣 :
 
 LabPilot is a lightweight and fully responsive web application designed to simplify laboratory operations in schools and universities. The goal of this project is to give students and staff a single place to manage practical sessions, equipment, chemicals, attendance, and report submissions without relying on manual paperwork or scattered systems.
